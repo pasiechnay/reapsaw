@@ -18,6 +18,32 @@ BUG_BAR_CSS = {
     },
 }
 
+BUG_BAR_CSS_LOW_RISK = {
+    "Cross-site Scripting (XSS)": {
+        "is_issue": "",
+        "risk_rating": "Low",
+        "jira_priority": "Major",
+        "burp": "",
+        "grouped": "",
+        "cxsast": "Cross-site scripting (reflected);Reflected_XSS_All_Clients;Stored_XSS",
+        "description": {},
+        "recommendation": {}
+    },
+}
+
+BUG_BAR_CSS_CRITICAL_RISK = {
+    "Cross-site Scripting (XSS)": {
+        "is_issue": "",
+        "risk_rating": "Critical",
+        "jira_priority": "Major",
+        "burp": "",
+        "grouped": "",
+        "cxsast": "Cross-site scripting (reflected);Reflected_XSS_All_Clients;Stored_XSS",
+        "description": {},
+        "recommendation": {}
+    },
+}
+
 BUG_BAR_SQLI = {
     "SQL Injection": {
         "is_issue": "",
@@ -173,3 +199,25 @@ class TestCheckmarxReport(unittest.TestCase):
         item = cx_report.report[0]
         self.assertIn(expected, item['Description'])
         self.assertEqual(expected_rec, item['Recommendations'])
+
+    @mock.patch.dict(os.environ, {'REPO': 'https://github.com/myrepo'})
+    @mock.patch('sast_controller.drivers.cx.Checkmarx.Checkmarx')
+    def test_report_with_higher_risk_rating(self, cx_klass):
+        self.mock_return_json.return_value = BUG_BAR_CSS_LOW_RISK
+        cx_report = CheckmarxReport.CheckmarxReport(
+            os.path.dirname(os.path.abspath(__file__)) + '/checkmarx_report.xml')
+        report = cx_report.report
+        self.assertNotEqual(report, [])
+        for _ in report:
+            self.assertEqual(_['Issue Severity'], 'High')
+
+    @mock.patch.dict(os.environ, {'REPO': 'https://github.com/myrepo'})
+    @mock.patch('sast_controller.drivers.cx.Checkmarx.Checkmarx')
+    def test_report_with_lower_risk_rating(self, cx_klass):
+        self.mock_return_json.return_value = BUG_BAR_CSS_CRITICAL_RISK
+        cx_report = CheckmarxReport.CheckmarxReport(
+            os.path.dirname(os.path.abspath(__file__)) + '/checkmarx_report.xml')
+        report = cx_report.report
+        self.assertNotEqual(report, [])
+        for _ in report:
+            self.assertEqual(_['Issue Severity'], 'Critical')
