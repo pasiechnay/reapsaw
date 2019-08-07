@@ -196,7 +196,7 @@ class CheckmarxReport(BaseReport):
                 name = bug_bar_issue
                 if self.bug_bar[bug_bar_issue]['is_issue'] == 'FALSE':
                     continue
-                if SEVERITY_MAPPING[severity] < SEVERITY_MAPPING[self.bug_bar[bug_bar_issue]['risk_rating']]:
+                if SEVERITY_MAPPING.get(severity, -1) < SEVERITY_MAPPING[self.bug_bar[bug_bar_issue]['risk_rating']]:
                     severity = self.bug_bar[bug_bar_issue]['risk_rating']
                 priority = self.bug_bar[bug_bar_issue]['jira_priority']
                 if lang.lower() in self.bug_bar[bug_bar_issue]['description']:
