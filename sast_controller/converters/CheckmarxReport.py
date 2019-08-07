@@ -18,10 +18,10 @@ import logging
 import os
 
 from sast_controller.bin import config
+from sast_controller.converters import SEVERITY_MAPPING
 from sast_controller.drivers.cx import Checkmarx, utils
 from sast_controller.extractors import vulnerability_info as vi
 from sast_controller.converters.BaseReport import BaseReport
-
 
 LOG = logging.getLogger(__name__)
 utils.configure_logging(LOG)
@@ -196,7 +196,8 @@ class CheckmarxReport(BaseReport):
                 name = bug_bar_issue
                 if self.bug_bar[bug_bar_issue]['is_issue'] == 'FALSE':
                     continue
-                severity = self.bug_bar[bug_bar_issue]['risk_rating']
+                if SEVERITY_MAPPING[severity] < SEVERITY_MAPPING[self.bug_bar[bug_bar_issue]['risk_rating']]:
+                    severity = self.bug_bar[bug_bar_issue]['risk_rating']
                 priority = self.bug_bar[bug_bar_issue]['jira_priority']
                 if lang.lower() in self.bug_bar[bug_bar_issue]['description']:
                     desc = self.bug_bar[bug_bar_issue]['description'][lang.lower()]
